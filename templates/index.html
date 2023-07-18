@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Simple Microwave Oven Interface</title>
+    <style>
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 50px;
+        }
+        .button {
+            padding: 10px 20px;
+            margin: 10px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        .cancel {
+            color: red;
+        }
+        .display {
+            font-size: 24px;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+<h1>Microwave Oven</h1>
+<div class="container">
+    <div>
+        <label for="jwt_token">JWT:</label>
+        <input type="text" id="jwt_token"
+               value="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IlBpb3RyIE1pY2hhbGlrIiwiaWF0IjoxNTE2MjM5MDIyfQ.oZ6a__3tISIYUS-L1yWkpqXaYbBgOCGphAKuACPNedk"/>
+    </div>
+    <div>
+        <div class="display" id="displayState"></div>
+        <div class="display" id="displayPower"></div>
+        <div class="display" id="displayCounter"></div>
+    </div>
+    <div>
+        <button class="button"
+                onclick="request('microwaves/microwave_1/power_adjustment', { change: 0.1 })">
+            Power +10%
+        </button>
+        <button class="button" onclick="request('microwaves/microwave_1/power_adjustment', { change: -0.1 })">
+            Power -10%
+        </button>
+    </div>
+    <div>
+        <button class="button"
+                onclick="request('microwaves/microwave_1/counter_adjustment', { change: 10.0 })">
+            Counter +10s
+        </button>
+        <button class="button"
+                onclick="request('microwaves/microwave_1/counter_adjustment', { change: -10.0 })">
+            Counter -10s
+        </button>
+    </div>
+    <div>
+        <button class="button cancel" onclick="request('microwaves/microwave_1/cancel', {})">Cancel</button>
+    </div>
+</div>
+
+<script>
+        const backend_server = 'localhost:5000'
+        const jwt_token = document.getElementById('jwt_token');
+        const messagesDiv = document.getElementById('messages');
+        const stateDiv = document.getElementById('displayState');
+        const powerDiv = document.getElementById('displayPower');
+        const counterDiv = document.getElementById('displayCounter');
+
+        const socket_pull = new WebSocket(`ws://${window.location.host}/ws_pull/`);
+
+        socket_pull.onmessage = (event) => {
+            let data = JSON.parse(event.data);
+            stateDiv.innerHTML = `<p>State: ${data.state}</p>`;
+            powerDiv.innerHTML = `<p>Power: ${data.power}</p>`;
+            counterDiv.innerHTML = `<p>Counter: ${data.counter}</p>`;
+        };
+
+        async function request(endpoint, body) {
+            const url = `http://${window.location.host}/${endpoint}`;
+            sendPostRequest(url, body);
+        };
+
+        async function sendPostRequest(url, body) {
+            const body_data = body;
+
+            try {
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${jwt_token.value}`
+                    },
+                    body: JSON.stringify(body_data)
+                });
+
+                const responseData = await response.json();
+                console.log('Response data:', responseData);
+
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        }
+</script>
+</body>
+</html>

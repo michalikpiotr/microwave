@@ -1,0 +1,28 @@
+version: "3.8"
+
+services:
+  api:
+    build:
+      context: .
+    image: microwave
+    depends_on:
+      - redis
+    networks:
+      - default_network
+    env_file:
+      - .env
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./:/app
+    command: [ "poetry", "run", "uvicorn", "--host=0.0.0.0", "--port=5000", "--reload", "src.main:app" ]
+
+  redis:
+    image: redis
+    ports:
+      - '6379:6379'
+    networks:
+      - default_network
+
+networks:
+  default_network:

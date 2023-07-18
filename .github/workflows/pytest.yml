@@ -1,0 +1,19 @@
+name: Backend Tests
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Python Set Up
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.9'
+      - name: Install dependencies
+        run: pip install poetry && poetry config virtualenvs.create false && poetry install --no-dev
+      - name: Run tests
+        run: pytest src/tests/
