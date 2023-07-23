@@ -1,9 +1,10 @@
+""" Redis DB operations"""
 from src.backend.crud.base import DbCrud
-from src.backend.services.db import get_redis_db
+from src.backend.services.db_connection import get_redis_db
 
 
 class RedisCrud(DbCrud):
-    """Redis db operations"""
+    """Redis db class"""
 
     def __init__(self):
         self._redis_client = get_redis_db()

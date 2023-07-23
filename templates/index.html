@@ -22,6 +22,15 @@
             font-size: 24px;
             margin-top: 20px;
         }
+
+
+
+
+
+
+
+
+
     </style>
 </head>
 <body>
@@ -39,25 +48,25 @@
     </div>
     <div>
         <button class="button"
-                onclick="request('microwaves/microwave_1/power_adjustment', { change: 0.1 })">
+                onclick="request('PATCH', 'microwaves/microwave_1/adjustment', { power_step: 10})">
             Power +10%
         </button>
-        <button class="button" onclick="request('microwaves/microwave_1/power_adjustment', { change: -0.1 })">
+        <button class="button" onclick="request('PATCH', 'microwaves/microwave_1/adjustment', { power_step: -10})">
             Power -10%
         </button>
     </div>
     <div>
         <button class="button"
-                onclick="request('microwaves/microwave_1/counter_adjustment', { change: 10.0 })">
+                onclick="request('PATCH', 'microwaves/microwave_1/adjustment', { counter_step: 10})">
             Counter +10s
         </button>
         <button class="button"
-                onclick="request('microwaves/microwave_1/counter_adjustment', { change: -10.0 })">
+                onclick="request('PATCH', 'microwaves/microwave_1/adjustment', { counter_step: -10})">
             Counter -10s
         </button>
     </div>
     <div>
-        <button class="button cancel" onclick="request('microwaves/microwave_1/cancel', {})">Cancel</button>
+        <button class="button cancel" onclick="request('POST','microwaves/microwave_1/cancel', {})">Cancel</button>
     </div>
 </div>
 
@@ -78,17 +87,17 @@
             counterDiv.innerHTML = `<p>Counter: ${data.counter}</p>`;
         };
 
-        async function request(endpoint, body) {
+        async function request(method, endpoint, body) {
             const url = `http://${window.location.host}/${endpoint}`;
-            sendPostRequest(url, body);
+            sendPostRequest(method, url, body);
         };
 
-        async function sendPostRequest(url, body) {
+        async function sendPostRequest(method, url, body) {
             const body_data = body;
 
             try {
                 const response = await fetch(url, {
-                    method: 'POST',
+                    method: `${method}`,
                     headers: {
                         'Content-Type': 'application/json',
                         'Authorization': `Bearer ${jwt_token.value}`
@@ -103,6 +112,15 @@
                 console.error('Error:', error);
             }
         }
+
+
+
+
+
+
+
+
+
 </script>
 </body>
 </html>

@@ -22,7 +22,7 @@ def app() -> FastAPI:
     api_app.add_middleware(
         CORSMiddleware,
         allow_origins=["*"],
-        allow_methods=["GET", "POST"],
+        allow_methods=["GET", "POST", "PATCH"],
         allow_headers=["*"],
     )
     api_app.include_router(ui_router)

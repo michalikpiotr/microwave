@@ -1,3 +1,5 @@
+""" Abstract available db operations"""
+
 from abc import ABC, abstractmethod
 
 
@@ -6,8 +8,8 @@ class DbCrud(ABC):
 
     @abstractmethod
     def get_item(self, item):
-        pass
+        """Get db item"""
 
     @abstractmethod
     def create_item(self, item, values):
-        pass
+        """Create db item"""
