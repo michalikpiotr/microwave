@@ -1,10 +1,11 @@
+""" Websockets """
 import asyncio
 import json
 
 from fastapi import APIRouter, WebSocket
 
+from src.backend.config import get_settings
 from src.backend.crud.db import db_client
-from src.backend.models.microwaves import DEFAULT_MICROWAVE_ID
 
 router = APIRouter()
 
@@ -16,10 +17,11 @@ async def websocket_endpoint(websocket: WebSocket):
     Args:
         websocket: WebSocket object
     """
+    settings = get_settings()
     await websocket.accept()
 
     while True:
-        obj = db_client().get_item(DEFAULT_MICROWAVE_ID)
+        obj = db_client().get_item(settings.DEFAULT_MICROWAVE_ID)
         await websocket.send_json(json.loads(obj))
 
         await asyncio.sleep(1)
