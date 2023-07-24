@@ -1,3 +1,4 @@
+""" Test app settings """
 from src.backend.config import Settings
 
 TEST_SETTINGS = Settings(

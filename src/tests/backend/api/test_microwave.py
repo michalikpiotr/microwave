@@ -1,3 +1,4 @@
+""" Test microwave oven api """
 import os
 from unittest.mock import patch
 
@@ -9,7 +10,10 @@ from src.backend.models.microwaves import MicrowaveInfoModel
 
 
 class DB:
+    """DB class"""
+
     def get_item(self):
+        """Get db item"""
         return b'{"microwave_id":"test1","state":"Off","power":0,"counter":0}'
 
 

@@ -1,3 +1,4 @@
+""" Pytest global conftest """
 from unittest.mock import patch
 
 import pytest

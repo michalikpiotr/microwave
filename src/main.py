@@ -1,3 +1,5 @@
+""" Microwave oven main app"""
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
