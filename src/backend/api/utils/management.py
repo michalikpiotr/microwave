@@ -1,5 +1,6 @@
 """ Microwave oven management"""
 import asyncio
+import enum
 import json
 
 from src.backend.config import get_settings
@@ -10,43 +11,51 @@ from src.backend.models.microwaves import (
 )
 
 
+class MicrowaveDetails(enum.Enum):
+    INSTANCE_ID = enum.auto()
+    COUNT = enum.auto()
+
+
 class MicrowaveCounter:
     """Microwave Oven shared background counter"""
 
-    _instance = None
-    _count = 0
+    _instances = {}
 
-    def __new__(cls):
-        if cls._instance is None:
-            cls._instance = super().__new__(cls)
-        return cls._instance
+    def __new__(cls, microwave_id: str):
+        if microwave_id not in cls._instances:
+            cls._instances[microwave_id] = {
+                MicrowaveDetails.INSTANCE_ID: super().__new__(cls),
+                MicrowaveDetails.COUNT: 0,
+            }
+        return cls._instances[microwave_id][MicrowaveDetails.INSTANCE_ID]
 
-    @classmethod
-    def increment(cls, count):
+    def __init__(self, microwave_id):
+        self._microwave_id = microwave_id
+
+    def increment(self, count):
         """Microwave oven counter incrementation"""
-        cls._count += count
+        self._instances[self._microwave_id][MicrowaveDetails.COUNT] += count
 
-    @classmethod
-    def get_count(cls):
+    def get_count(self):
         """Get microwave oven current counter"""
-        return cls._count
+        return self._instances[self._microwave_id][MicrowaveDetails.COUNT]
 
-    @classmethod
-    def stop_task(cls):
+    def stop_task(self):
         """Set counter to 0 to stop the microwave oven"""
-        cls._count = 0
+        self._instances[self._microwave_id][MicrowaveDetails.COUNT] = 0
 
-    @classmethod
-    async def decrement_counter(cls, microwave_obj: MicrowaveInfoModel):
+    async def decrement_counter(self, microwave_obj: MicrowaveInfoModel):
         """Microwave oven countdown"""
         settings = get_settings()
         db_client_connection = db_client()
-        while cls._count > 0:
-            cls._count -= 1
+        while self._instances[self._microwave_id][MicrowaveDetails.COUNT] > 0:
+            self._instances[self._microwave_id][MicrowaveDetails.COUNT] -= 1
             await asyncio.sleep(1)
             obj = db_client_connection.get_item(microwave_obj.microwave_id)
             microwave_obj = MicrowaveInfoModel(**json.loads(obj))
-            microwave_obj.counter = cls._count
+            microwave_obj.counter = self._instances[self._microwave_id][
+                MicrowaveDetails.COUNT
+            ]
             microwave_obj.state = MicrowaveStates.ON
             db_client_connection.create_item(
                 microwave_obj.microwave_id, microwave_obj.model_dump_json()

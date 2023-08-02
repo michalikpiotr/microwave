@@ -21,7 +21,7 @@ async def websocket_endpoint(websocket: WebSocket):
     await websocket.accept()
 
     while True:
-        obj = db_client().get_item(settings.DEFAULT_MICROWAVE_ID)
+        obj = db_client().get_item(settings.DEFAULT_MICROWAVE_ID_1)
         await websocket.send_json(json.loads(obj))
 
         await asyncio.sleep(1)

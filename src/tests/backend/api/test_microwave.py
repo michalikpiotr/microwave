@@ -19,7 +19,7 @@ class DB:
 
 def test_microwave_get(client: TestClient):
     """Microwave oven get microwave by id"""
-    microwave_id = os.environ["DEFAULT_MICROWAVE_ID"]
+    microwave_id = os.environ["DEFAULT_MICROWAVE_ID_1"]
 
     with patch("src.backend.api.microwaves.db_client", return_value=DB):
         response = client.get(f"/microwaves/{microwave_id}/")
@@ -35,7 +35,7 @@ def test_microwave_get(client: TestClient):
 
 def test_microwave_power_adjustment(client: TestClient):
     """Microwave oven adjustment"""
-    microwave_id = os.environ["DEFAULT_MICROWAVE_ID"]
+    microwave_id = os.environ["DEFAULT_MICROWAVE_ID_1"]
     power_step = 10
     microwave_db_new_obj = MicrowaveInfoModel(
         microwave_id=f"{microwave_id}", state="On", power=power_step, counter=0
@@ -64,7 +64,7 @@ def test_microwave_power_adjustment(client: TestClient):
 
 def test_microwave_counter_adjustment(client: TestClient):
     """Microwave oven adjustment"""
-    microwave_id = os.environ["DEFAULT_MICROWAVE_ID"]
+    microwave_id = os.environ["DEFAULT_MICROWAVE_ID_1"]
     counter_step = 10
     microwave_db_new_obj = MicrowaveInfoModel(
         microwave_id=f"{microwave_id}", state="On", power=0, counter=counter_step
@@ -102,7 +102,7 @@ def test_microwave_invalid_counter_adjustment(
     counter_step, error_msg, client: TestClient
 ):
     """Microwave oven adjustment"""
-    microwave_id = os.environ["DEFAULT_MICROWAVE_ID"]
+    microwave_id = os.environ["DEFAULT_MICROWAVE_ID_1"]
     microwave_db_new_obj = MicrowaveInfoModel(
         microwave_id=f"{microwave_id}", state="On", power=0, counter=counter_step
     )
@@ -131,7 +131,7 @@ def test_microwave_invalid_counter_adjustment(
 )
 def test_microwave_invalid_power_adjustment(power_step, error_msg, client: TestClient):
     """Microwave oven adjustment"""
-    microwave_id = os.environ["DEFAULT_MICROWAVE_ID"]
+    microwave_id = os.environ["DEFAULT_MICROWAVE_ID_1"]
     microwave_db_new_obj = MicrowaveInfoModel(
         microwave_id=f"{microwave_id}", state="On", power=0, counter=power_step
     )

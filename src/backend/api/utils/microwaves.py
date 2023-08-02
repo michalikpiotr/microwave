@@ -39,11 +39,11 @@ def counter_adjustment(
             < microwave_obj.counter + adjustments.counter_step
             <= settings.DEFAULT_MICROWAVE_MAX_COUNTER
         ):
-            counter_obj = MicrowaveCounter()
+            counter_obj = MicrowaveCounter(microwave_id=microwave_id)
 
             increment_value = adjustments.counter_step + START_UP_DELAY
             microwave_obj.counter += increment_value
-            if MicrowaveCounter.get_count() == settings.DEFAULT_MICROWAVE_MIN_COUNTER:
+            if counter_obj.get_count() == settings.DEFAULT_MICROWAVE_MIN_COUNTER:
                 counter_obj.increment(increment_value)
                 background_tasks.add_task(counter_obj.decrement_counter, microwave_obj)
                 del counter_obj
