@@ -89,8 +89,9 @@ def power_adjustment(
                 if microwave_obj.power > 0 or microwave_obj.counter > 0
                 else MicrowaveStates.OFF
             )
-
-        db_client().create_item(microwave_id, microwave_obj.model_dump_json())
+        db_client_connection = db_client()
+        db_client_connection.create_item(microwave_id, microwave_obj.model_dump_json())
+        db_client_connection.execute_transaction()
         return microwave_obj
     except Exception:
         raise HTTPException(

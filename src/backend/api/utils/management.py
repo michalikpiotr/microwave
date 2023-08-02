@@ -46,11 +46,12 @@ class MicrowaveCounter:
 
     async def decrement_counter(self, microwave_obj: MicrowaveInfoModel):
         """Microwave oven countdown"""
-        settings = get_settings()
+
         db_client_connection = db_client()
         while self._instances[self._microwave_id][MicrowaveDetails.COUNT] > 0:
             self._instances[self._microwave_id][MicrowaveDetails.COUNT] -= 1
             await asyncio.sleep(1)
+
             obj = db_client_connection.get_item(microwave_obj.microwave_id)
             microwave_obj = MicrowaveInfoModel(**json.loads(obj))
             microwave_obj.counter = self._instances[self._microwave_id][
@@ -60,11 +61,22 @@ class MicrowaveCounter:
             db_client_connection.create_item(
                 microwave_obj.microwave_id, microwave_obj.model_dump_json()
             )
+
+            db_client_connection.execute_transaction()
+
+        MicrowaveCounter.microwave_off_check(microwave_obj, db_client_connection)
+
+    @classmethod
+    def microwave_off_check(cls, microwave_obj, db_client_connection):
+        """Function to set the state of the microwave oven to Off when conditions are met"""
+
+        settings = get_settings()
         if (
             microwave_obj.counter == settings.DEFAULT_MICROWAVE_MIN_COUNTER
             and microwave_obj.power == settings.DEFAULT_MICROWAVE_MIN_POWER
         ):
             microwave_obj.state = MicrowaveStates.OFF
-        db_client_connection.create_item(
-            microwave_obj.microwave_id, microwave_obj.model_dump_json()
-        )
+            db_client_connection.create_item(
+                microwave_obj.microwave_id, microwave_obj.model_dump_json()
+            )
+            db_client_connection.execute_transaction()

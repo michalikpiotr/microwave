@@ -26,10 +26,11 @@ async def startup():
         power=settings.DEFAULT_MICROWAVE_MIN_POWER,
         counter=settings.DEFAULT_MICROWAVE_MIN_COUNTER,
     )
-
-    db_client().create_item(
+    db_client_connection = db_client()
+    db_client_connection.create_item(
         settings.DEFAULT_MICROWAVE_ID_1, default_microwave.model_dump_json()
     )
-    db_client().create_item(
+    db_client_connection.create_item(
         settings.DEFAULT_MICROWAVE_ID_2, default_microwave1.model_dump_json()
     )
+    db_client_connection.execute_transaction()

@@ -86,13 +86,14 @@ async def cancel(
     """
     try:
         MicrowaveCounter(microwave_id=microwave_id).stop_task()
-
-        obj = db_client().get_item(microwave_id)
+        db_client_connection = db_client()
+        obj = db_client_connection.get_item(microwave_id)
         if obj:
-            db_client().create_item(
+            db_client_connection.create_item(
                 microwave_id,
                 MicrowaveInfoModel(microwave_id=microwave_id).model_dump_json(),
             )
+            db_client_connection.execute_transaction()
             return f"Hi {user}, microwave oven ({microwave_id}) canceled"
         return f"Hi {user}, microwave oven ({microwave_id}) not found"
     except Exception:

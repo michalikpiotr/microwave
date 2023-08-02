@@ -13,3 +13,7 @@ class DbCrud(ABC):
     @abstractmethod
     def create_item(self, item, values):
         """Create db item"""
+
+    @abstractmethod
+    def execute_transaction(self):
+        """Execute transaction db"""
