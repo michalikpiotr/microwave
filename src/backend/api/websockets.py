@@ -5,7 +5,7 @@ import json
 from fastapi import APIRouter, WebSocket
 
 from src.backend.config import get_settings
-from src.backend.crud.db import db_client
+from src.backend.crud.redis import RedisCrud
 
 router = APIRouter()
 
@@ -20,8 +20,8 @@ async def websocket_endpoint(websocket: WebSocket):
     settings = get_settings()
     await websocket.accept()
 
-    while True:
-        obj = db_client().get_item(settings.DEFAULT_MICROWAVE_ID_1)
-        await websocket.send_json(json.loads(obj))
-
-        await asyncio.sleep(1)
+    with RedisCrud() as db_client_connection:
+        while True:
+            obj = db_client_connection.get_item(settings.DEFAULT_MICROWAVE_ID_1)
+            await websocket.send_json(json.loads(obj))
+            await asyncio.sleep(1)

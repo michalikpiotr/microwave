@@ -4,7 +4,7 @@ from fastapi import APIRouter
 from src.backend.config import (
     get_settings,
 )
-from src.backend.crud.db import db_client
+from src.backend.crud.redis import RedisCrud, RedisTransaction
 from src.backend.models.microwaves import MicrowaveInfoModel, MicrowaveStates
 
 router = APIRouter()
@@ -26,11 +26,12 @@ async def startup():
         power=settings.DEFAULT_MICROWAVE_MIN_POWER,
         counter=settings.DEFAULT_MICROWAVE_MIN_COUNTER,
     )
-    db_client_connection = db_client()
-    db_client_connection.create_item(
-        settings.DEFAULT_MICROWAVE_ID_1, default_microwave.model_dump_json()
-    )
-    db_client_connection.create_item(
-        settings.DEFAULT_MICROWAVE_ID_2, default_microwave1.model_dump_json()
-    )
-    db_client_connection.execute_transaction()
+
+    with RedisCrud() as db_client_connection:
+        with RedisTransaction(db_client_connection) as transaction:
+            transaction.create_item(
+                settings.DEFAULT_MICROWAVE_ID_1, default_microwave.model_dump_json()
+            )
+            transaction.create_item(
+                settings.DEFAULT_MICROWAVE_ID_2, default_microwave1.model_dump_json()
+            )

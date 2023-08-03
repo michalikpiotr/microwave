@@ -15,5 +15,9 @@ class DbCrud(ABC):
         """Create db item"""
 
     @abstractmethod
-    def execute_transaction(self):
-        """Execute transaction db"""
+    def __enter__(self):
+        """Query context manager enter"""
+
+    @abstractmethod
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        """Query context manager exit"""

@@ -12,16 +12,28 @@ from src.backend.models.microwaves import MicrowaveInfoModel
 class DB:
     """DB class"""
 
-    def get_item(self):
+    def get_item(self, *args):
         """Get db item"""
         return b'{"microwave_id":"test1","state":"Off","power":0,"counter":0}'
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        pass
+
+
+def get_item():
+    """Get db item"""
+    return b'{"microwave_id":"test1","state":"Off","power":0,"counter":0}'
 
 
 def test_microwave_get(client: TestClient):
     """Microwave oven get microwave by id"""
+
     microwave_id = os.environ["DEFAULT_MICROWAVE_ID_1"]
 
-    with patch("src.backend.api.microwaves.db_client", return_value=DB):
+    with patch("src.backend.api.microwaves.RedisCrud", side_effect=DB):
         response = client.get(f"/microwaves/{microwave_id}/")
 
     assert response.status_code == status.HTTP_200_OK
@@ -44,7 +56,7 @@ def test_microwave_power_adjustment(client: TestClient):
         "power_step": power_step,
     }
 
-    with patch("src.backend.api.microwaves.db_client", return_value=DB):
+    with patch("src.backend.api.microwaves.RedisCrud", side_effect=DB):
         with patch(
             "src.backend.api.microwaves.power_adjustment",
             return_value=microwave_db_new_obj,
@@ -73,7 +85,7 @@ def test_microwave_counter_adjustment(client: TestClient):
         "counter_step": counter_step,
     }
 
-    with patch("src.backend.api.microwaves.db_client", return_value=DB):
+    with patch("src.backend.api.microwaves.RedisCrud", side_effect=DB):
         with patch(
             "src.backend.api.microwaves.counter_adjustment",
             return_value=microwave_db_new_obj,
@@ -110,7 +122,7 @@ def test_microwave_invalid_counter_adjustment(
         "counter_step": counter_step,
     }
 
-    with patch("src.backend.api.microwaves.db_client", return_value=DB):
+    with patch("src.backend.api.microwaves.RedisCrud", return_value=DB):
         with patch(
             "src.backend.api.microwaves.power_adjustment",
             return_value=microwave_db_new_obj,
@@ -139,7 +151,7 @@ def test_microwave_invalid_power_adjustment(power_step, error_msg, client: TestC
         "counter_step": power_step,
     }
 
-    with patch("src.backend.api.microwaves.db_client", return_value=DB):
+    with patch("src.backend.api.microwaves.RedisCrud", return_value=DB):
         with patch(
             "src.backend.api.microwaves.counter_adjustment",
             return_value=microwave_db_new_obj,

@@ -4,7 +4,8 @@ from fastapi import BackgroundTasks, HTTPException, status
 
 from src.backend.api.utils.management import MicrowaveCounter
 from src.backend.config import get_settings
-from src.backend.crud.db import db_client
+from src.backend.crud.base import DbCrud
+from src.backend.crud.redis import RedisTransaction
 from src.backend.models.microwaves import (
     MicrowaveStates,
     MicrowaveInfoModel,
@@ -15,6 +16,7 @@ START_UP_DELAY = 1
 
 
 def counter_adjustment(
+    db_client_connection: DbCrud,
     microwave_id: str,
     microwave_obj: MicrowaveInfoModel,
     adjustments: MicrowaveAdjustmentModel,
@@ -24,6 +26,7 @@ def counter_adjustment(
     Microwave oven counter adjustment
 
     Args:
+        db_client_connection: db connection
         microwave_id: microwave oven db id
         microwave_obj: microwave oven MicrowaveInfoModel object
         adjustments: microwave oven adjustments model
@@ -39,7 +42,9 @@ def counter_adjustment(
             < microwave_obj.counter + adjustments.counter_step
             <= settings.DEFAULT_MICROWAVE_MAX_COUNTER
         ):
-            counter_obj = MicrowaveCounter(microwave_id=microwave_id)
+            counter_obj = MicrowaveCounter(
+                db_client_connection, microwave_id=microwave_id
+            )
 
             increment_value = adjustments.counter_step + START_UP_DELAY
             microwave_obj.counter += increment_value
@@ -58,6 +63,7 @@ def counter_adjustment(
 
 
 def power_adjustment(
+    db_client_connection: DbCrud,
     microwave_id: str,
     microwave_obj: MicrowaveInfoModel,
     adjustments: MicrowaveAdjustmentModel,
@@ -66,6 +72,7 @@ def power_adjustment(
     Microwave oven power adjustment
 
     Args:
+        db_client_connection: db connection
         microwave_id: microwave oven db id
         microwave_obj: microwave oven MicrowaveInfoModel object
         adjustments: microwave oven adjustments model
@@ -89,9 +96,8 @@ def power_adjustment(
                 if microwave_obj.power > 0 or microwave_obj.counter > 0
                 else MicrowaveStates.OFF
             )
-        db_client_connection = db_client()
-        db_client_connection.create_item(microwave_id, microwave_obj.model_dump_json())
-        db_client_connection.execute_transaction()
+        with RedisTransaction(db_client_connection) as transaction:
+            transaction.create_item(microwave_id, microwave_obj.model_dump_json())
         return microwave_obj
     except Exception:
         raise HTTPException(
