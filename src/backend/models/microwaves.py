@@ -17,9 +17,7 @@ class MicrowaveStates(str, Enum):
 class MicrowaveInfoModel(BaseModel):
     """Microwave oven parameters model"""
 
-    microwave_id: str = Field(
-        default_factory=lambda: str(get_settings().DEFAULT_MICROWAVE_ID)
-    )
+    microwave_id: str
     state: str = MicrowaveStates.OFF
     power: int = Field(
         default_factory=lambda: str(get_settings().DEFAULT_MICROWAVE_MIN_POWER)

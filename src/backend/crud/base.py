@@ -13,3 +13,11 @@ class DbCrud(ABC):
     @abstractmethod
     def create_item(self, item, values):
         """Create db item"""
+
+    @abstractmethod
+    def __enter__(self):
+        """Query context manager enter"""
+
+    @abstractmethod
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        """Query context manager exit"""
